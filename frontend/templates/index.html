@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-body">
+                <h3 class="card-title mb-3">Get AI help with your course material</h3>
+                <p class="text-muted">
+                    Paste your lecture notes or assignment description, choose how I can help,
+                    and I’ll generate summaries, explanations, practice questions or study plans.
+                </p>
+
+                {% if error %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endif %}
+
+                <form method="post" action="{{ url_for('study.analyze') }}">
+                    <div class="mb-3">
+                        <label for="course_name" class="form-label">Course name</label>
+                        <input type="text"
+                               class="form-control"
+                               id="course_name"
+                               name="course_name"
+                               placeholder="e.g. Modern Software Development"
+                               value="{{ previous_form.course_name if previous_form else '' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="content_type" class="form-label">Content type</label>
+                        <select class="form-select" id="content_type" name="content_type">
+                            {% set selected = previous_form.content_type if previous_form else 'Lecture notes' %}
+                            <option value="Lecture notes"
+                                {% if selected == 'Lecture notes' %}selected{% endif %}>Lecture notes</option>
+                            <option value="Assignment description"
+                                {% if selected == 'Assignment description' %}selected{% endif %}>
+                                Assignment description
+                            </option>
+                            <option value="Exam topic"
+                                {% if selected == 'Exam topic' %}selected{% endif %}>Exam topic</option>
+                            <option value="Project brief"
+                                {% if selected == 'Project brief' %}selected{% endif %}>Project brief</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="help_type" class="form-label">What do you need help with?</label>
+                        {% set selected_help = previous_form.help_type if previous_form else 'summary' %}
+                        <select class="form-select" id="help_type" name="help_type">
+                            <option value="summary"
+                                {% if selected_help == 'summary' %}selected{% endif %}>Summarize this</option>
+                            <option value="explain"
+                                {% if selected_help == 'explain' %}selected{% endif %}>Explain like I'm a beginner</option>
+                            <option value="questions"
+                                {% if selected_help == 'questions' %}selected{% endif %}>Generate practice questions</option>
+                            <option value="plan"
+                                {% if selected_help == 'plan' %}selected{% endif %}>Create a study/implementation plan</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="raw_text" class="form-label">Your text</label>
+                        <textarea class="form-control"
+                                  id="raw_text"
+                                  name="raw_text"
+                                  rows="8"
+                                  placeholder="Paste your lecture notes or assignment description here...">{{ previous_form.raw_text if previous_form else '' }}</textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Generate AI help
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        {% if history %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Recent requests</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                        <tr>
+                            <th scope="col">Time (UTC)</th>
+                            <th scope="col">Course</th>
+                            <th scope="col">Help type</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for item in history %}
+                            <tr>
+                                <td>{{ item.created_at }}</td>
+                                <td>{{ item.course_name }}</td>
+                                <td>{{ item.help_type }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
